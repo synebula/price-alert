@@ -15,7 +15,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-def send_email(price, url, email_info):
+def send_email(name, price, url, email_info):
     try:
         s = smtplib.SMTP(email_info['smtp_url'])
         s.starttls()
@@ -25,14 +25,14 @@ def send_email(price, url, email_info):
     else:
         logger.info('Logged in! Composing message..')
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = 'Price Alert - %s' % price
+        msg['Subject'] = 'Amazon Subscribe Alert - %s' % price
         msg['From'] = email_info['user']
-        msg['To'] = email_info['user']
-        text = 'The price is currently %s !! URL to salepage: %s' % (
-            price, url)
+        msg['To'] = email_info['receive']
+        text = 'The %s price is currently %s !! URL to salepage: %s' % (
+            name, price, url)
         part = MIMEText(text, 'plain')
         msg.attach(part)
-        s.sendmail(email_info['user'], email_info['user'], msg.as_string())
+        s.sendmail(msg['From'], msg['To'], msg.as_string())
         logger.info('Message has been sent.')
 
 
@@ -44,11 +44,12 @@ def get_price(url, selector):
     })
     r.raise_for_status()
     tree = html.fromstring(r.text)
+
     try:
         # extract the price from the string
         price_string = re.findall('\d+.\d+', tree.xpath(selector)[0].text)[0]
         logger.info(price_string)
-        return float(price_string.replace(',', '.'))
+        return float(price_string.replace(',', ''))
     except (IndexError, TypeError) as e:
         logger.debug(e)
         logger.info('Didn\'t find the \'price\' element, trying again later')
@@ -65,6 +66,13 @@ def config_logger(debug):
     logger.setLevel(logging.DEBUG if debug else logging.INFO)
     handler = logging.StreamHandler()
     logger.addHandler(handler)
+    log_path = os.getcwd() + '/log.log'
+    file_handler = logging.FileHandler(log_path, mode='a+')
+    file_handler.setLevel(logging.WARN)  # 输出到file的log等级的开关
+    formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
 
 
 def parse_args():
@@ -89,14 +97,14 @@ def main():
     while True and len(items):
         for item in copy(items):
             logger.info('Checking price for %s (should be lower than %s)' % (
-                item[0], item[1]))
-            item_page = urljoin(config['base_url'], item[0])
+                item['name'], item['price']))
+            item_page = urljoin(config['base_url'], item['key'])
             price = get_price(item_page, config['xpath_selector'])
             if not price:
                 continue
-            elif price <= item[1]:
-                logger.info('Price is %s!! Trying to send email.' % price)
-                send_email(price, item_page, config['email'])
+            elif price <= item['price']:
+                logger.warn('%s rice is %s!! Trying to send email.' % (item['name'], price))
+                send_email(item['name'], price, item_page, config['email'])
                 items.remove(item)
             else:
                 logger.info('Price is %s. Ignoring...' % price)

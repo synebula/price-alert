@@ -2,12 +2,20 @@
     "email": {
         "smtp_url": "smtp.gmail.com:587",
         "user": "youremail@gmail.com",
-        "password": "yourpassword"
+        "password": "yourpassword",
+        "receive": "your-receive-mail@gmail.com"
     },
-    "base_url": "https://www.amazon.de/dp/",
+    "base_url": "https://www.amazon.cn/dp/",
     "xpath_selector": "//*[@id='priceblock_ourprice']",
     "items": [
-        ["B01J90P010", 50],
-        ["B01M3015CT", 100]
+        {
+            "name": "EPSON EH-TW650",
+            "key": "B075ZX5M2K",
+            "price": 2800
+        },
+        {
+            "name": "JBL 305P MKII",
+            "key": "B07CMH78R5",
+            "price": 1000
+        }
     ]
-}
