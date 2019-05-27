@@ -22,15 +22,16 @@ Configuration is held in json format, `config.json` is used by default and has s
     - `user` - the email address to be used for authentication
     - `password` - the password to be used for authentication
         (if you have 2FA set up on your account, take a look at [app passwords](https://security.google.com/settings/security/apppasswords))
+    - `receive` - the email to be receive notify mail
 
 - `base_url` (string) - the base amazon url of the sales page, differs among the different variants of amazon.
 
 - `xpath_selector` (string) - the xpath selector of the element holding the price in the sale page, the default is true for all amazon variants that have been tested so far (default: `//*[@id='priceblock_ourprice']`)
 
-- `items` (array) - an array of items, each item should be an array as follows:
+- `items` (array) - an object of items, each item should be an object as follows:
 
 
-    `[amazon_item_id_string, price_in_integer]`
+    `{"name": item_name, "key": amazon_item_id_string, "price": price_in_integer}`
 
 
 ## Running the script
