@@ -17,8 +17,10 @@ from email.mime.text import MIMEText
 
 def send_email(name, price, url, email_info):
     try:
-        s = smtplib.SMTP(email_info['smtp_url'])
-        s.starttls()
+        if email_info['ssl']:
+            s = smtplib.SMTP_SSL(email_info['smtp_url'])
+        else:
+            s = smtplib.SMTP(email_info['smtp_url'])
         s.login(email_info['user'], email_info['password'])
     except smtplib.SMTPAuthenticationError:
         logger.info('Failed to login')
@@ -103,7 +105,7 @@ def main():
             if not price:
                 continue
             elif price <= item['price']:
-                logger.warn('%s price is %s!! Trying to send email.' % (item['name'], price))
+                logger.warning('%s price is %s!! Trying to send email.' % (item['name'], price))
                 send_email(item['name'], price, item_page, config['email'])
                 items.remove(item)
             else:
