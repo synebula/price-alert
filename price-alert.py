@@ -103,7 +103,7 @@ def main():
             if not price:
                 continue
             elif price <= item['price']:
-                logger.warn('%s rice is %s!! Trying to send email.' % (item['name'], price))
+                logger.warn('%s price is %s!! Trying to send email.' % (item['name'], price))
                 send_email(item['name'], price, item_page, config['email'])
                 items.remove(item)
             else:
